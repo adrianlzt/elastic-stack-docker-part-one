@@ -1,7 +1,29 @@
-# Getting started with the Elastic Stack and Docker-Compose
+# Bug nginx-kibana
 
-This repo is in reference to the blog [Getting started with the Elastic Stack and Docker-Compose](https://www.elastic.co/blog/getting-started-with-the-elastic-stack-and-docker-compose)
+Si configuramos nginx como frontend de kibana, vemos que, en algunos casos,
+las segundas peticiones que lanzamos no son contestadas.
 
-Please feel free to ask any questions via issues [here](https://github.com/elkninja/elastic-stack-docker-part-one/issues), our [Community Slack](https://ela.st/slack), or over in our [Discuss Forums](https://discuss.elastic.co/).
+Para reproducer el problema, podemos seguir los siguientes pasos:
 
-Pull Requests welcome :)
+1. Levantar docker-compose
+
+```bash
+docker-compose up
+```
+
+2. Loguearnos en kibana
+
+3. Coger la cookie que se genera (ver alguna de las peticiones que lanza el navegador tras logearnos)
+
+4. Lanzar dos veces esta petición (cambiando la cookie):
+
+```bash
+curl 'http://localhost:8080/internal/bsearch' \
+  -H 'Content-Type: application/json' \
+  -H 'Cookie: sid=PONER_LA_COOKIE' \
+  -H 'elastic-api-version: 1' \
+  -H 'kbn-version: 8.11.1' \
+  --data-raw '{ "batch": [ { "request": { "params": { "index": "system-*" } } } ] }'
+```
+
+La primera petición funcionará correctamente, pero la segunda no, no contestará.
